@@ -103,3 +103,9 @@ Exact command: python -c "import yaml; yaml.safe_load(open('.github/workflows/ci
 Timestamp (UTC): 2026-11-27T10:10:10Z
 YAML syntax: valid
 exit code: 0
+
+---
+REAL GITHUB ACTIONS EVIDENCE (added after pushing)
+- ci_green.png: run on branch `assessment`, jobs `test` -> `build` both passed.
+- ci_failing_build_skipped.png: run on throwaway branch `demo-failing-test` with one assertion changed (8 -> 9); `test` failed and `build` was skipped (needs: test). Branch deleted afterwards, never merged.
+- The earlier "local simulation" above remains as supporting evidence.
