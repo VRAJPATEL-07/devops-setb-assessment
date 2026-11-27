@@ -1,0 +1,15 @@
+.git
+.github
+.terraform
+infra
+k8s
+generated
+logs
+evidence
+*.tfstate
+*.tfplan
+tfplan
+__pycache__
+*.pyc
+.pytest_cache
+.env
