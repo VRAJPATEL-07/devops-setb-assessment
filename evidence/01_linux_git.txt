@@ -1,0 +1,91 @@
+
+=== Step 1a: log fixture totals ===
+Exact command: wc -l logs/access.log
+Timestamp (UTC): 2026-11-27T09:58:45Z
+24 logs/access.log
+exit code: 0
+
+=== Step 1a: HTTP 4xx count ===
+Exact command: awk '$2 >= 400 && $2 < 500 {count++} END {print count+0}' logs/access.log
+Timestamp (UTC): 2026-11-27T09:58:45Z
+4
+exit code: 0
+
+=== Step 1a: HTTP 5xx count ===
+Exact command: awk '$2 >= 500 && $2 < 600 {count++} END {print count+0}' logs/access.log
+Timestamp (UTC): 2026-11-27T09:58:45Z
+2
+exit code: 0
+
+=== Step 1a: top 3 routes ===
+Exact command: awk '{print $4}' logs/access.log | sort | uniq -c | sort -rn | head -3
+Timestamp (UTC): 2026-11-27T09:58:45Z
+      8 /healthz
+      6 /api/slots?department=orthopedics
+      5 /readyz
+exit code: 0
+
+=== Step 1b: analyzer successful run ===
+Exact command: scripts/analyze_logs.sh logs/access.log
+Timestamp (UTC): 2026-11-27T09:58:45Z
+Total requests: 24
+HTTP 4xx: 4
+HTTP 5xx: 2
+5xx rate: 8.33%
+Top 3 routes:
+      8 /healthz
+      6 /api/slots?department=orthopedics
+      5 /readyz
+exit code: 0
+
+=== Step 1b: analyzer missing-file error ===
+Exact command: scripts/analyze_logs.sh logs/not-found.log
+Timestamp (UTC): 2026-11-27T09:58:45Z
+Error: file not found: logs/not-found.log
+exit code: 2
+
+=== Step 1c: git status ===
+Exact command: git status --short --branch
+Timestamp (UTC): 2026-11-27T09:58:45Z
+## assessment
+ D .dockerignore.template
+ M .gitignore
+ D Dockerfile.TODO
+ D compose.yaml.TODO
+ M infra/main.tf
+ M infra/variables.tf
+ D k8s/README.txt
+?? .dockerignore
+?? .github/workflows/ci.yml
+?? Dockerfile
+?? compose.yaml
+?? evidence/01_linux_git.txt
+?? k8s/configmap.yaml
+?? k8s/deployment.yaml
+?? k8s/namespace.yaml
+?? k8s/service.yaml
+?? scripts/analyze_logs.sh
+?? scripts/ev.sh
+exit code: 0
+
+=== Step 1c: recent Git history ===
+Exact command: git --no-pager log --oneline
+Timestamp (UTC): 2026-11-27T09:58:45Z
+b0a90e7 Add Set B starter kit
+1348c84 Initial commit
+exit code: 0
+
+=== Step 1c: ignored generated files ===
+Exact command: git check-ignore -v generated/service.env infra/terraform.tfstate infra/.terraform
+Timestamp (UTC): 2026-11-27T09:58:45Z
+.gitignore:10:generated/service.env	generated/service.env
+.gitignore:1:*.tfstate	infra/terraform.tfstate
+exit code: 0
+
+=== Step 1c: verify ignored Terraform directory contents ===
+Exact command: git check-ignore -v generated/service.env infra/terraform.tfstate infra/.terraform/placeholder
+Timestamp (UTC): 2026-11-27T10:06:59Z
+.gitignore:10:generated/service.env	generated/service.env
+.gitignore:1:*.tfstate	infra/terraform.tfstate
+.gitignore:3:.terraform/	infra/.terraform/placeholder
+exit code: 0

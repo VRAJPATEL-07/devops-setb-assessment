@@ -1,0 +1,309 @@
+
+=== Step 3: Docker daemon information ===
+Exact command: docker info --format "Server={{.ServerVersion}}"
+Timestamp (UTC): 2026-11-27T09:59:21Z
+Server=29.9.2-2
+exit code: 0
+
+=== Step 3: Compose configuration validation ===
+Exact command: docker compose config
+Timestamp (UTC): 2026-11-27T09:59:21Z
+name: devops-setb-assessment
+services:
+  appointment-slots:
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    environment:
+      APP_ENV: dev
+      APP_NAME: appointment-slots
+      FAIL_MODE: "0"
+      LOG_LEVEL: INFO
+      PORT: "8080"
+    image: appointment-slots:local
+    networks:
+      default: null
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp
+    build:
+      context: /workspaces/devops-setb-assessment
+      dockerfile: Dockerfile
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 8080
+        published: "8080"
+        protocol: tcp
+networks:
+  default:
+    name: devops-setb-assessment_default
+exit code: 0
+
+=== Step 3: build and start Compose service ===
+Exact command: docker compose up --build -d
+Timestamp (UTC): 2026-11-27T09:59:30Z
+ Image appointment-slots:local Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 577B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 523B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12-slim
+#3 ...
+
+#4 [auth] library/python:pull token for registry-1.docker.io
+#4 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12-slim
+#3 DONE 2.1s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 161B done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 5.74kB done
+#6 DONE 0.0s
+
+#7 [1/4] FROM docker.io/library/python:3.12-slim@sha256:191083cdf6c7bda8c76158983163ead5d5cf7b77cf3033e805bb0f5296f51b4b
+#7 resolve docker.io/library/python:3.12-slim@sha256:191083cdf6c7bda8c76158983163ead5d5cf7b77cf3033e805bb0f5296f51b4b 0.0s done
+#7 DONE 0.1s
+
+#7 [1/4] FROM docker.io/library/python:3.12-slim@sha256:191083cdf6c7bda8c76158983163ead5d5cf7b77cf3033e805bb0f5296f51b4b
+#7 sha256:286d8c291daa64125703b22c3d009462bcae0b630eaa16ad5b934502c4917233 0B / 248B 0.2s
+#7 sha256:286d8c291daa64125703b22c3d009462bcae0b630eaa16ad5b934502c4917233 248B / 248B 0.2s done
+#7 sha256:e3e428093f5e80791498526d73a46eabf0e69575dc10897cf47aa99120e41712 0B / 12.12MB 0.3s
+#7 sha256:30cf67d7101c07c55eef20970bc403fbde5f8600c2c4c38b4881a2da4fffb0b6 0B / 1.29MB 0.2s
+#7 sha256:40748add9f4f6f944f334cbfc286590d6e93f60fb06f6ee7ffa1b894080ad861 0B / 29.84MB 0.2s
+#7 sha256:e3e428093f5e80791498526d73a46eabf0e69575dc10897cf47aa99120e41712 12.12MB / 12.12MB 0.6s
+#7 sha256:e3e428093f5e80791498526d73a46eabf0e69575dc10897cf47aa99120e41712 12.12MB / 12.12MB 0.7s done
+#7 sha256:30cf67d7101c07c55eef20970bc403fbde5f8600c2c4c38b4881a2da4fffb0b6 1.29MB / 1.29MB 0.6s
+#7 sha256:30cf67d7101c07c55eef20970bc403fbde5f8600c2c4c38b4881a2da4fffb0b6 1.29MB / 1.29MB 0.8s done
+#7 sha256:40748add9f4f6f944f334cbfc286590d6e93f60fb06f6ee7ffa1b894080ad861 29.84MB / 29.84MB 0.9s
+#7 sha256:40748add9f4f6f944f334cbfc286590d6e93f60fb06f6ee7ffa1b894080ad861 29.84MB / 29.84MB 1.2s done
+#7 extracting sha256:40748add9f4f6f944f334cbfc286590d6e93f60fb06f6ee7ffa1b894080ad861
+#7 extracting sha256:40748add9f4f6f944f334cbfc286590d6e93f60fb06f6ee7ffa1b894080ad861 1.0s done
+#7 DONE 2.4s
+
+#7 [1/4] FROM docker.io/library/python:3.12-slim@sha256:191083cdf6c7bda8c76158983163ead5d5cf7b77cf3033e805bb0f5296f51b4b
+#7 extracting sha256:30cf67d7101c07c55eef20970bc403fbde5f8600c2c4c38b4881a2da4fffb0b6 0.1s done
+#7 DONE 2.5s
+
+#7 [1/4] FROM docker.io/library/python:3.12-slim@sha256:191083cdf6c7bda8c76158983163ead5d5cf7b77cf3033e805bb0f5296f51b4b
+#7 extracting sha256:e3e428093f5e80791498526d73a46eabf0e69575dc10897cf47aa99120e41712
+#7 extracting sha256:e3e428093f5e80791498526d73a46eabf0e69575dc10897cf47aa99120e41712 0.5s done
+#7 DONE 3.1s
+
+#7 [1/4] FROM docker.io/library/python:3.12-slim@sha256:191083cdf6c7bda8c76158983163ead5d5cf7b77cf3033e805bb0f5296f51b4b
+#7 extracting sha256:286d8c291daa64125703b22c3d009462bcae0b630eaa16ad5b934502c4917233 0.0s done
+#7 DONE 3.1s
+
+#8 [2/4] WORKDIR /app
+#8 DONE 2.3s
+
+#9 [3/4] RUN groupadd --gid 10001 app &&     useradd --uid 10001 --gid app --no-create-home --shell /usr/sbin/nologin app
+#9 DONE 0.3s
+
+#10 [4/4] COPY app/ ./app/
+#10 DONE 0.1s
+
+#11 exporting to image
+#11 exporting layers 0.1s done
+#11 exporting manifest sha256:db7ebb9a51feeb0fc4f9cb6fe32f50f85d1abbd13d87827e6d1b8dfa60e25449 0.0s done
+#11 exporting config sha256:b853bac883c903976e70389a6e82afd01d7101fb4107cebe86c6d4d0471694e2 0.0s done
+#11 exporting attestation manifest sha256:e2375d496676fba4205cc28fa5462045a446ee92fa24aaf88a97a6a9cf501e39 0.0s done
+#11 exporting manifest list sha256:448552dce2f4cd53fef71a193c3eee2d91bebc241c117c87536188f3952fa4fd 0.0s done
+#11 naming to docker.io/library/appointment-slots:local done
+#11 unpacking to docker.io/library/appointment-slots:local
+#11 unpacking to docker.io/library/appointment-slots:local 1.7s done
+#11 DONE 1.9s
+
+#12 resolving provenance for metadata file
+#12 DONE 0.0s
+ Image appointment-slots:local Built 
+ Network devops-setb-assessment_default Creating 
+ Network devops-setb-assessment_default Creating 
+ Network devops-setb-assessment_default Created 
+ Network devops-setb-assessment_default Created 
+ Container devops-setb-assessment-appointment-slots-1 Creating 
+ Container devops-setb-assessment-appointment-slots-1 Created 
+ Container devops-setb-assessment-appointment-slots-1 Starting 
+ Container devops-setb-assessment-appointment-slots-1 Started 
+exit code: 0
+
+=== Step 3: wait for healthy container ===
+Exact command: for i in $(seq 1 30); do status=$(docker inspect --format "{{.State.Health.Status}}" "$(docker compose ps -q appointment-slots)"); echo "health=$status"; [ "$status" = healthy ] && exit 0; sleep 2; done; exit 1
+Timestamp (UTC): 2026-11-27T09:59:57Z
+health=healthy
+exit code: 0
+
+=== Step 3: Compose status ===
+Exact command: docker compose ps
+Timestamp (UTC): 2026-11-27T09:59:57Z
+NAME                                         IMAGE                     COMMAND                  SERVICE             CREATED          STATUS                    PORTS
+devops-setb-assessment-appointment-slots-1   appointment-slots:local   "python -m app.server"   appointment-slots   16 seconds ago   Up 13 seconds (healthy)   127.0.0.1:8080->8080/tcp
+exit code: 0
+
+=== Step 3: GET healthz ===
+Exact command: curl -i http://127.0.0.1:8080/healthz
+Timestamp (UTC): 2026-11-27T09:59:57Z
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    19  100    19    0     0   3904      0 --:--:-- --:--:-- --:--:--  4750
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.12.16
+Date: Fri, 27 Nov 2026 09:59:57 GMT
+Content-Type: application/json
+Content-Length: 19
+
+{"status": "alive"}exit code: 0
+
+=== Step 3: GET readyz ===
+Exact command: curl -i http://127.0.0.1:8080/readyz
+Timestamp (UTC): 2026-11-27T09:59:57Z
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    19  100    19    0     0   3187      0 --:--:-- --:--:-- --:--:--  3800
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.12.16
+Date: Fri, 27 Nov 2026 09:59:57 GMT
+Content-Type: application/json
+Content-Length: 19
+
+{"status": "ready"}exit code: 0
+
+=== Step 3: GET info ===
+Exact command: curl -i http://127.0.0.1:8080/info
+Timestamp (UTC): 2026-11-27T09:59:57Z
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    50  100    50    0     0  19692      0 --:--:-- --:--:-- --:--:-- 25000
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.12.16
+Date: Fri, 27 Nov 2026 09:59:57 GMT
+Content-Type: application/json
+Content-Length: 50
+
+{"app": "appointment-slots", "environment": "dev"}exit code: 0
+
+=== Step 3: GET orthopedic slots ===
+Exact command: curl -i 'http://127.0.0.1:8080/api/slots?department=orthopedics'
+Timestamp (UTC): 2026-11-27T09:59:57Z
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    41  100    41    0     0  15940      0 --:--:-- --:--:-- --:--:-- 20500
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.12.16
+Date: Fri, 27 Nov 2026 09:59:57 GMT
+Content-Type: application/json
+Content-Length: 41
+
+{"department": "orthopedics", "slots": 8}exit code: 0
+
+=== Step 3: GET unknown route ===
+Exact command: curl -i http://127.0.0.1:8080/unknown
+Timestamp (UTC): 2026-11-27T09:59:57Z
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    27  100    27    0     0  11363      0 --:--:-- --:--:-- --:--:-- 13500
+HTTP/1.0 404 Not Found
+Server: BaseHTTP/0.6 Python/3.12.16
+Date: Fri, 27 Nov 2026 09:59:57 GMT
+Content-Type: application/json
+Content-Length: 27
+
+{"error": "path_not_found"}exit code: 0
+
+=== Step 3: Compose logs ===
+Exact command: docker compose logs --no-color
+Timestamp (UTC): 2026-11-27T09:59:57Z
+appointment-slots-1  | 127.0.0.1 "GET /healthz HTTP/1.1" 200 -
+appointment-slots-1  | 172.18.0.1 "GET / HTTP/1.1" 404 -
+appointment-slots-1  | 172.18.0.1 "GET /favicon.ico HTTP/1.1" 404 -
+appointment-slots-1  | 172.18.0.1 "GET /healthz HTTP/1.1" 200 -
+appointment-slots-1  | 172.18.0.1 "GET /readyz HTTP/1.1" 200 -
+appointment-slots-1  | 172.18.0.1 "GET /info HTTP/1.1" 200 -
+appointment-slots-1  | 172.18.0.1 "GET /api/slots?department=orthopedics HTTP/1.1" 200 -
+appointment-slots-1  | 172.18.0.1 "GET /unknown HTTP/1.1" 404 -
+exit code: 0
+
+=== Step 3: container identity ===
+Exact command: docker compose exec appointment-slots id
+Timestamp (UTC): 2026-11-27T09:59:58Z
+uid=10001(app) gid=10001(app) groups=10001(app)
+exit code: 0
+
+=== Step 3: container health state ===
+Exact command: docker inspect --format "{{.State.Health.Status}}" "$(docker compose ps -q appointment-slots)"
+Timestamp (UTC): 2026-11-27T09:59:58Z
+healthy
+exit code: 0
+
+=== Step 3: Compose teardown ===
+Exact command: docker compose down
+Timestamp (UTC): 2026-11-27T09:59:58Z
+ Container devops-setb-assessment-appointment-slots-1 Stopping 
+ Container devops-setb-assessment-appointment-slots-1 Stopped 
+ Container devops-setb-assessment-appointment-slots-1 Removing 
+ Container devops-setb-assessment-appointment-slots-1 Removed 
+ Network devops-setb-assessment_default Removing 
+ Network devops-setb-assessment_default Removed 
+exit code: 0
+
+=== Step 3: Compose clean state ===
+Exact command: docker compose ps
+Timestamp (UTC): 2026-11-27T10:00:08Z
+NAME      IMAGE     COMMAND   SERVICE   CREATED   STATUS    PORTS
+exit code: 0
+
+=== Final Compose configuration and service state ===
+Exact command: docker compose config && docker compose ps
+Timestamp (UTC): 2026-11-27T10:10:09Z
+name: devops-setb-assessment
+services:
+  appointment-slots:
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    environment:
+      APP_ENV: dev
+      APP_NAME: appointment-slots
+      FAIL_MODE: "0"
+      LOG_LEVEL: INFO
+      PORT: "8080"
+    image: appointment-slots:local
+    networks:
+      default: null
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp
+    build:
+      context: /workspaces/devops-setb-assessment
+      dockerfile: Dockerfile
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 8080
+        published: "8080"
+        protocol: tcp
+networks:
+  default:
+    name: devops-setb-assessment_default
+NAME      IMAGE     COMMAND   SERVICE   CREATED   STATUS    PORTS
+exit code: 0
+
+=== Final Compose cleanup ===
+Exact command: docker compose down && docker compose ps
+Timestamp (UTC): 2026-11-27T10:12:04Z
+ Network devops-setb-assessment_default Removing 
+ Network devops-setb-assessment_default Removed 
+NAME      IMAGE     COMMAND   SERVICE   CREATED   STATUS    PORTS
+exit code: 0

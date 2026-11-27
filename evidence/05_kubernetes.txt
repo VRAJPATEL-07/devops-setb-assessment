@@ -1,0 +1,339 @@
+
+=== Step 5: kubectl client version ===
+Exact command: kubectl version --client
+Timestamp (UTC): 2026-11-27T09:59:21Z
+Client Version: v1.37.3
+Kustomize Version: v5.8.1
+exit code: 0
+
+=== Step 5: static YAML parsing ===
+Exact command: python -c "import yaml, pathlib; files=sorted(pathlib.Path('k8s').glob('*.yaml')); [yaml.safe_load(p.read_text()) for p in files]; print('Parsed:', ', '.join(map(str, files)))"
+Timestamp (UTC): 2026-11-27T09:59:21Z
+Parsed: k8s/configmap.yaml, k8s/deployment.yaml, k8s/namespace.yaml, k8s/service.yaml
+exit code: 0
+
+=== Step 5: kubectl client dry-run ===
+Exact command: kubectl apply --dry-run=client -f k8s/
+Timestamp (UTC): 2026-11-27T09:59:22Z
+error validating "k8s/configmap.yaml": error validating data: failed to download openapi: Get "http://localhost:8080/openapi/v2?timeout=32s": dial tcp [::1]:8080: connect: connection refused; if you choose to ignore these errors, turn validation off with --validate=false
+error validating "k8s/deployment.yaml": error validating data: failed to download openapi: Get "http://localhost:8080/openapi/v2?timeout=32s": dial tcp [::1]:8080: connect: connection refused; if you choose to ignore these errors, turn validation off with --validate=false
+error validating "k8s/namespace.yaml": error validating data: failed to download openapi: Get "http://localhost:8080/openapi/v2?timeout=32s": dial tcp [::1]:8080: connect: connection refused; if you choose to ignore these errors, turn validation off with --validate=false
+error validating "k8s/service.yaml": error validating data: failed to download openapi: Get "http://localhost:8080/openapi/v2?timeout=32s": dial tcp [::1]:8080: connect: connection refused; if you choose to ignore these errors, turn validation off with --validate=false
+exit code: 1
+
+=== Step 5: create local kind cluster ===
+Exact command: kind create cluster --name devops-assessment
+Timestamp (UTC): 2026-11-27T10:00:20Z
+Creating cluster "devops-assessment" ...
+ • Ensuring node image (kindest/node:v1.37.0) 🖼️  ...
+ ✓ Ensuring node image (kindest/node:v1.37.0) 🖼️
+ • Preparing nodes 📦   ...
+ ✓ Preparing nodes 📦 
+ • Writing configuration 📜  ...
+ ✓ Writing configuration 📜
+ • Starting control-plane 🕹️  ...
+ ✓ Starting control-plane 🕹️
+ • Installing CNI 🔌  ...
+ ✓ Installing CNI 🔌
+ • Installing StorageClass 💾  ...
+ ✓ Installing StorageClass 💾
+Set kubectl context to "kind-devops-assessment"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-devops-assessment
+
+Have a nice day! 👋
+exit code: 0
+
+=== Step 5: kubectl client dry-run with cluster ===
+Exact command: kubectl apply --dry-run=client -f k8s/
+Timestamp (UTC): 2026-11-27T10:01:37Z
+configmap/appointment-slots created (dry run)
+deployment.apps/appointment-slots created (dry run)
+namespace/devops-assessment created (dry run)
+service/appointment-slots created (dry run)
+exit code: 0
+
+=== Step 5: build v1 container image ===
+Exact command: docker build -t appointment-slots:v1 .
+Timestamp (UTC): 2026-11-27T10:01:38Z
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 523B 0.0s done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/python:3.12-slim
+#2 DONE 0.7s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 161B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 358B done
+#4 DONE 0.0s
+
+#5 [1/4] FROM docker.io/library/python:3.12-slim@sha256:191083cdf6c7bda8c76158983163ead5d5cf7b77cf3033e805bb0f5296f51b4b
+#5 resolve docker.io/library/python:3.12-slim@sha256:191083cdf6c7bda8c76158983163ead5d5cf7b77cf3033e805bb0f5296f51b4b 0.1s done
+#5 DONE 0.1s
+
+#6 [3/4] RUN groupadd --gid 10001 app &&     useradd --uid 10001 --gid app --no-create-home --shell /usr/sbin/nologin app
+#6 CACHED
+
+#7 [2/4] WORKDIR /app
+#7 CACHED
+
+#8 [4/4] COPY app/ ./app/
+#8 CACHED
+
+#9 exporting to image
+#9 exporting layers 0.0s done
+#9 exporting manifest sha256:b33f62fedb67a7bc3c6e6113feb8c9d28c752d00f5e8d8a5033a32d52f4176ae 0.0s done
+#9 exporting config sha256:8b74459ff882d76eea257e74e58360aa694aeb1902c2ccfb3b17614522797d33 0.0s done
+#9 exporting attestation manifest sha256:d5977b511e8b983c0718d81c24e65c187795fdc6de00bdfd5864e36a5dfaa14c 0.0s done
+#9 exporting manifest list sha256:b30c3d8622b6d0d1d8940de97c7d3fed0195a70828e4893f16d354fb603ba395 0.0s done
+#9 naming to docker.io/library/appointment-slots:v1
+#9 naming to docker.io/library/appointment-slots:v1 done
+#9 unpacking to docker.io/library/appointment-slots:v1 0.0s done
+#9 DONE 0.3s
+exit code: 0
+
+=== Step 5: load v1 image into kind ===
+Exact command: kind load docker-image appointment-slots:v1 --name devops-assessment
+Timestamp (UTC): 2026-11-27T10:01:41Z
+Image: "appointment-slots:v1" with ID "sha256:b30c3d8622b6d0d1d8940de97c7d3fed0195a70828e4893f16d354fb603ba395" not yet present on node "devops-assessment-control-plane", loading...
+exit code: 0
+
+=== Step 5: apply namespace ===
+Exact command: kubectl apply -f k8s/namespace.yaml
+Timestamp (UTC): 2026-11-27T10:01:51Z
+namespace/devops-assessment created
+exit code: 0
+
+=== Step 5: apply configmap ===
+Exact command: kubectl apply -f k8s/configmap.yaml
+Timestamp (UTC): 2026-11-27T10:01:53Z
+configmap/appointment-slots created
+exit code: 0
+
+=== Step 5: apply deployment ===
+Exact command: kubectl apply -f k8s/deployment.yaml
+Timestamp (UTC): 2026-11-27T10:01:53Z
+deployment.apps/appointment-slots created
+exit code: 0
+
+=== Step 5: apply service ===
+Exact command: kubectl apply -f k8s/service.yaml
+Timestamp (UTC): 2026-11-27T10:01:53Z
+service/appointment-slots created
+exit code: 0
+
+=== Step 5: initial rollout status ===
+Exact command: kubectl rollout status deployment/appointment-slots -n devops-assessment --timeout=120s
+Timestamp (UTC): 2026-11-27T10:01:53Z
+Waiting for deployment "appointment-slots" rollout to finish: 0 of 2 updated replicas are available...
+Waiting for deployment "appointment-slots" rollout to finish: 1 of 2 updated replicas are available...
+deployment "appointment-slots" successfully rolled out
+exit code: 0
+
+=== Step 5: initial resources ===
+Exact command: kubectl get all,cm -n devops-assessment -o wide
+Timestamp (UTC): 2026-11-27T10:02:00Z
+NAME                                     READY   STATUS    RESTARTS   AGE   IP           NODE                              NOMINATED NODE   READINESS GATES
+pod/appointment-slots-77dd5ffbc8-b64xj   1/1     Running   0          7s    10.244.0.5   devops-assessment-control-plane   <none>           <none>
+pod/appointment-slots-77dd5ffbc8-nf4kl   1/1     Running   0          7s    10.244.0.6   devops-assessment-control-plane   <none>           <none>
+
+NAME                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE   SELECTOR
+service/appointment-slots   ClusterIP   10.96.108.224   <none>        80/TCP    7s    app=appointment-slots
+
+NAME                                READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS          IMAGES                 SELECTOR
+deployment.apps/appointment-slots   2/2     2            2           7s    appointment-slots   appointment-slots:v1   app=appointment-slots
+
+NAME                                           DESIRED   CURRENT   READY   AGE   CONTAINERS          IMAGES                 SELECTOR
+replicaset.apps/appointment-slots-77dd5ffbc8   2         2         2       7s    appointment-slots   appointment-slots:v1   app=appointment-slots,pod-template-hash=77dd5ffbc8
+
+NAME                          DATA   AGE
+configmap/appointment-slots   5      7s
+configmap/kube-root-ca.crt    1      7s
+exit code: 0
+
+=== Step 5: initial Kubernetes endpoints ===
+Exact command: kubectl port-forward -n devops-assessment svc/appointment-slots 8080:80 >/tmp/appointment-slots-port-forward.txt 2>&1 & pf=$!; sleep 3; curl -i http://127.0.0.1:8080/healthz; curl -i http://127.0.0.1:8080/readyz; curl -i http://127.0.0.1:8080/info; curl -i "http://127.0.0.1:8080/api/slots?department=orthopedics"; curl -i http://127.0.0.1:8080/unknown; kill "$pf"; wait "$pf" 2>/dev/null || true
+Timestamp (UTC): 2026-11-27T10:02:44Z
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    19  100    19    0     0   1056      0 --:--:-- --:--:-- --:--:--  1117
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.12.16
+Date: Fri, 27 Nov 2026 10:02:47 GMT
+Content-Type: application/json
+Content-Length: 19
+
+{"status": "alive"}  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    19  100    19    0     0   2402      0 --:--:-- --:--:-- --:--:--  2714
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.12.16
+Date: Fri, 27 Nov 2026 10:02:47 GMT
+Content-Type: application/json
+Content-Length: 19
+
+{"status": "ready"}  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    50  100    50    0     0   4624      0 --:--:-- --:--:-- --:--:--  5000
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.12.16
+Date: Fri, 27 Nov 2026 10:02:47 GMT
+Content-Type: application/json
+Content-Length: 50
+
+{"app": "appointment-slots", "environment": "dev"}  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    41  100    41    0     0   4329      0 --:--:-- --:--:-- --:--:--  4555
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.12.16
+Date: Fri, 27 Nov 2026 10:02:47 GMT
+Content-Type: application/json
+Content-Length: 41
+
+{"department": "orthopedics", "slots": 8}  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    27  100    27    0     0   1866      0 --:--:-- --:--:-- --:--:--  1928
+HTTP/1.0 404 Not Found
+Server: BaseHTTP/0.6 Python/3.12.16
+Date: Fri, 27 Nov 2026 10:02:47 GMT
+Content-Type: application/json
+Content-Length: 27
+
+{"error": "path_not_found"}exit code: 0
+
+=== Step 5: Kubernetes container identity ===
+Exact command: kubectl exec -n devops-assessment deployment/appointment-slots -- id
+Timestamp (UTC): 2026-11-27T10:02:47Z
+uid=10001(app) gid=10001(app) groups=10001(app)
+exit code: 0
+
+=== Step 5: build v2 image ===
+Exact command: docker build -t appointment-slots:v2 .
+Timestamp (UTC): 2026-11-27T10:02:47Z
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 523B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.12-slim
+#2 DONE 0.7s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 161B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 358B done
+#4 DONE 0.0s
+
+#5 [1/4] FROM docker.io/library/python:3.12-slim@sha256:191083cdf6c7bda8c76158983163ead5d5cf7b77cf3033e805bb0f5296f51b4b
+#5 resolve docker.io/library/python:3.12-slim@sha256:191083cdf6c7bda8c76158983163ead5d5cf7b77cf3033e805bb0f5296f51b4b 0.0s done
+#5 DONE 0.0s
+
+#6 [2/4] WORKDIR /app
+#6 CACHED
+
+#7 [3/4] RUN groupadd --gid 10001 app &&     useradd --uid 10001 --gid app --no-create-home --shell /usr/sbin/nologin app
+#7 CACHED
+
+#8 [4/4] COPY app/ ./app/
+#8 CACHED
+
+#9 exporting to image
+#9 exporting layers done
+#9 exporting manifest sha256:b33f62fedb67a7bc3c6e6113feb8c9d28c752d00f5e8d8a5033a32d52f4176ae done
+#9 exporting config sha256:8b74459ff882d76eea257e74e58360aa694aeb1902c2ccfb3b17614522797d33 done
+#9 exporting attestation manifest sha256:cc92f724a5f7f266812683c80aeb79d8d7ecb7f1071d05584db5f6bf2e2c55fa 0.0s done
+#9 exporting manifest list sha256:154c6cf5bfbf8fc90b96b5d9596583e7cd2d65f70bf4b457bf664f097cd1d4af 0.0s done
+#9 naming to docker.io/library/appointment-slots:v2
+#9 naming to docker.io/library/appointment-slots:v2 done
+#9 unpacking to docker.io/library/appointment-slots:v2 done
+#9 DONE 0.1s
+exit code: 0
+
+=== Step 5: load v2 image into kind ===
+Exact command: kind load docker-image appointment-slots:v2 --name devops-assessment
+Timestamp (UTC): 2026-11-27T10:02:48Z
+Image: "appointment-slots:v2" with ID "sha256:154c6cf5bfbf8fc90b96b5d9596583e7cd2d65f70bf4b457bf664f097cd1d4af" not yet present on node "devops-assessment-control-plane", loading...
+exit code: 0
+
+=== Step 5: update to v2 ===
+Exact command: kubectl set image deployment/appointment-slots appointment-slots=appointment-slots:v2 -n devops-assessment
+Timestamp (UTC): 2026-11-27T10:02:52Z
+deployment.apps/appointment-slots image updated
+exit code: 0
+
+=== Step 5: annotate v2 rollout ===
+Exact command: kubectl annotate deployment/appointment-slots -n devops-assessment kubernetes.io/change-cause="healthy release appointment-slots:v2" --overwrite
+Timestamp (UTC): 2026-11-27T10:02:52Z
+deployment.apps/appointment-slots annotated
+exit code: 0
+
+=== Step 5: v2 rollout status ===
+Exact command: kubectl rollout status deployment/appointment-slots -n devops-assessment --timeout=120s
+Timestamp (UTC): 2026-11-27T10:02:52Z
+Waiting for deployment "appointment-slots" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "appointment-slots" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "appointment-slots" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "appointment-slots" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "appointment-slots" rollout to finish: 1 old replicas are pending termination...
+deployment "appointment-slots" successfully rolled out
+exit code: 0
+
+=== Step 5: v2 rollout history and pods ===
+Exact command: kubectl rollout history deployment/appointment-slots -n devops-assessment && kubectl get pods -n devops-assessment -o wide
+Timestamp (UTC): 2026-11-27T10:03:05Z
+deployment.apps/appointment-slots 
+REVISION  CHANGE-CAUSE
+1         initial release appointment-slots:v1
+2         healthy release appointment-slots:v2
+
+NAME                                 READY   STATUS        RESTARTS   AGE   IP           NODE                              NOMINATED NODE   READINESS GATES
+appointment-slots-76f7d45dd7-8mm8c   1/1     Running       0          13s   10.244.0.7   devops-assessment-control-plane   <none>           <none>
+appointment-slots-76f7d45dd7-gb2p8   1/1     Running       0          6s    10.244.0.8   devops-assessment-control-plane   <none>           <none>
+appointment-slots-77dd5ffbc8-b64xj   1/1     Terminating   0          72s   10.244.0.5   devops-assessment-control-plane   <none>           <none>
+appointment-slots-77dd5ffbc8-nf4kl   1/1     Terminating   0          72s   10.244.0.6   devops-assessment-control-plane   <none>           <none>
+exit code: 0
+
+=== Step 5: v2 service readiness endpoint ===
+Exact command: kubectl port-forward -n devops-assessment svc/appointment-slots 8080:80 >/tmp/appointment-slots-port-forward-v2.txt 2>&1 & pf=$!; sleep 3; curl -i http://127.0.0.1:8080/readyz; kill "$pf"; wait "$pf" 2>/dev/null || true
+Timestamp (UTC): 2026-11-27T10:03:18Z
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    19  100    19    0     0   1627      0 --:--:-- --:--:-- --:--:--  1727
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.12.16
+Date: Fri, 27 Nov 2026 10:03:21 GMT
+Content-Type: application/json
+Content-Length: 19
+
+{"status": "ready"}exit code: 0
+
+=== Final Kubernetes manifest YAML parse ===
+Exact command: python -c "import yaml, pathlib; files=sorted(pathlib.Path('k8s').glob('*.yaml')); [yaml.safe_load(p.read_text()) for p in files]; print('Parsed:', ', '.join(map(str, files)))"
+Timestamp (UTC): 2026-11-27T10:10:10Z
+Parsed: k8s/configmap.yaml, k8s/deployment.yaml, k8s/namespace.yaml, k8s/service.yaml
+exit code: 0
+
+=== Final Kubernetes deployment status ===
+Exact command: kubectl get deployment appointment-slots -n devops-assessment -o wide
+Timestamp (UTC): 2026-11-27T10:10:10Z
+NAME                READY   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS          IMAGES                 SELECTOR
+appointment-slots   2/2     2            2           8m17s   appointment-slots   appointment-slots:v2   app=appointment-slots
+exit code: 0
+
+=== Final kind cluster cleanup ===
+Exact command: kind delete cluster --name devops-assessment && kind get clusters
+Timestamp (UTC): 2026-11-27T10:12:04Z
+Deleting cluster "devops-assessment" ...
+Deleted nodes: ["devops-assessment-control-plane"]
+No kind clusters found.
+exit code: 0
