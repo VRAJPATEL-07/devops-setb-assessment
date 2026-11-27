@@ -1,0 +1,105 @@
+
+=== Step 4: Python compile (workflow command) ===
+Exact command: python -m py_compile app/*.py tests/*.py
+Timestamp (UTC): 2026-11-27T09:59:21Z
+exit code: 0
+
+=== Step 4: unittest suite (workflow command) ===
+Exact command: python -m unittest discover -s tests -v
+Timestamp (UTC): 2026-11-27T09:59:21Z
+test_healthz (test_server.ApiTests.test_healthz) ... ok
+test_info (test_server.ApiTests.test_info) ... ok
+test_known_item (test_server.ApiTests.test_known_item) ... ok
+test_other_url (test_server.ApiTests.test_other_url) ... ok
+test_readyz_failure_mode (test_server.ApiTests.test_readyz_failure_mode) ... ok
+test_readyz_normal (test_server.ApiTests.test_readyz_normal) ... ok
+test_unknown_item (test_server.ApiTests.test_unknown_item) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.003s
+
+OK
+exit code: 0
+
+=== Step 4: workflow YAML syntax validation ===
+Exact command: python -c "import yaml; yaml.safe_load(open('.github/workflows/ci.yml')); print('YAML syntax: valid')"
+Timestamp (UTC): 2026-11-27T09:59:22Z
+YAML syntax: valid
+exit code: 0
+
+=== Step 4: create throwaway failing-test branch ===
+Exact command: git switch -c demo-failing-test
+Timestamp (UTC): 2026-11-27T10:08:00Z
+Switched to a new branch 'demo-failing-test'
+exit code: 0
+
+=== Step 4: LOCAL SIMULATION of the CI job dependency (needs: test) ===
+Exact command: python -m unittest discover -s tests && { echo 'BUILD COMMAND REACHED'; docker build -t appointment-slots:demo .; } || { echo 'Docker build NOT executed: tests failed (CI needs: test).'; exit 1; }
+Timestamp (UTC): 2026-11-27T10:08:13Z
+..F....
+======================================================================
+FAIL: test_known_item (test_server.ApiTests.test_known_item)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspaces/devops-setb-assessment/tests/test_server.py", line 17, in test_known_item
+    self.assertEqual(data['slots'], 9)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+AssertionError: 8 != 9
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.001s
+
+FAILED (failures=1)
+Docker build NOT executed: tests failed (CI needs: test).
+exit code: 1
+
+=== Step 4: restore supplied test file ===
+Exact command: git checkout -- tests/test_server.py
+Timestamp (UTC): 2026-11-27T10:08:22Z
+exit code: 0
+
+=== Step 4: return to assessment branch ===
+Exact command: git switch assessment
+Timestamp (UTC): 2026-11-27T10:08:22Z
+Switched to branch 'assessment'
+M	README.md
+exit code: 0
+
+=== Step 4: delete throwaway branch ===
+Exact command: git branch -D demo-failing-test
+Timestamp (UTC): 2026-11-27T10:08:22Z
+Deleted branch demo-failing-test (was f0ea5d9).
+exit code: 0
+
+=== Step 4: verify supplied test file restoration ===
+Exact command: git diff --exit-code -- tests/test_server.py
+Timestamp (UTC): 2026-11-27T10:08:22Z
+exit code: 0
+
+=== Final restored source compile check ===
+Exact command: python -m py_compile app/*.py tests/*.py
+Timestamp (UTC): 2026-11-27T10:10:09Z
+exit code: 0
+
+=== Final restored unit test suite ===
+Exact command: python -m unittest discover -s tests -v
+Timestamp (UTC): 2026-11-27T10:10:10Z
+test_healthz (test_server.ApiTests.test_healthz) ... ok
+test_info (test_server.ApiTests.test_info) ... ok
+test_known_item (test_server.ApiTests.test_known_item) ... ok
+test_other_url (test_server.ApiTests.test_other_url) ... ok
+test_readyz_failure_mode (test_server.ApiTests.test_readyz_failure_mode) ... ok
+test_readyz_normal (test_server.ApiTests.test_readyz_normal) ... ok
+test_unknown_item (test_server.ApiTests.test_unknown_item) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.001s
+
+OK
+exit code: 0
+
+=== Final workflow YAML parse ===
+Exact command: python -c "import yaml; yaml.safe_load(open('.github/workflows/ci.yml')); print('YAML syntax: valid')"
+Timestamp (UTC): 2026-11-27T10:10:10Z
+YAML syntax: valid
+exit code: 0

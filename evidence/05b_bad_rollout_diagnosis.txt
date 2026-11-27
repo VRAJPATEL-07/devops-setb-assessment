@@ -1,0 +1,339 @@
+
+=== Step 5: trigger bad rollout with FAIL_MODE=1 ===
+Exact command: kubectl set env deployment/appointment-slots FAIL_MODE=1 -n devops-assessment
+Timestamp (UTC): 2026-11-27T10:03:21Z
+deployment.apps/appointment-slots env updated
+exit code: 0
+
+=== Step 5: annotate bad rollout ===
+Exact command: kubectl annotate deployment/appointment-slots -n devops-assessment kubernetes.io/change-cause="bad release FAIL_MODE=1" --overwrite
+Timestamp (UTC): 2026-11-27T10:03:21Z
+deployment.apps/appointment-slots annotated
+exit code: 0
+
+=== Step 5: bad rollout status (expected timeout/failure) ===
+Exact command: kubectl rollout status deployment/appointment-slots -n devops-assessment --timeout=60s
+Timestamp (UTC): 2026-11-27T10:03:21Z
+Waiting for deployment "appointment-slots" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "appointment-slots" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "appointment-slots" rollout to finish: 1 out of 2 new replicas have been updated...
+error: deployment "appointment-slots" exceeded its progress deadline
+exit code: 1
+
+=== Step 5: pod state and restart counts during bad rollout ===
+Exact command: kubectl get pods -n devops-assessment -o wide && kubectl get pods -n devops-assessment -o custom-columns=NAME:.metadata.name,READY:.status.containerStatuses[0].ready,RESTARTS:.status.containerStatuses[0].restartCount
+Timestamp (UTC): 2026-11-27T10:04:40Z
+NAME                                 READY   STATUS    RESTARTS   AGE    IP           NODE                              NOMINATED NODE   READINESS GATES
+appointment-slots-76f7d45dd7-8mm8c   1/1     Running   0          108s   10.244.0.7   devops-assessment-control-plane   <none>           <none>
+appointment-slots-76f7d45dd7-gb2p8   1/1     Running   0          101s   10.244.0.8   devops-assessment-control-plane   <none>           <none>
+appointment-slots-7974589dcb-b8kvd   0/1     Running   0          79s    10.244.0.9   devops-assessment-control-plane   <none>           <none>
+NAME                                 READY   RESTARTS
+appointment-slots-76f7d45dd7-8mm8c   true    0
+appointment-slots-76f7d45dd7-gb2p8   true    0
+appointment-slots-7974589dcb-b8kvd   false   0
+exit code: 0
+
+=== Step 5: describe newly created failing pod ===
+Exact command: newpod=$(kubectl get pods -n devops-assessment -l app=appointment-slots --sort-by=.metadata.creationTimestamp -o name | tail -n 1 | cut -d/ -f2); echo "new pod: $newpod"; kubectl describe pod "$newpod"
+Timestamp (UTC): 2026-11-27T10:04:40Z
+new pod: appointment-slots-7974589dcb-b8kvd
+Error from server (NotFound): pods "appointment-slots-7974589dcb-b8kvd" not found
+exit code: 1
+
+=== Step 5: describe failing pod by observed name ===
+Exact command: kubectl describe pod appointment-slots-7974589dcb-b8kvd -n devops-assessment
+Timestamp (UTC): 2026-11-27T10:04:57Z
+
+=== Step 5: endpoint slices during bad rollout ===
+Exact command: kubectl get endpointslice -n devops-assessment -l kubernetes.io/service-name=appointment-slots -o yaml && kubectl get events -n devops-assessment --sort-by=.lastTimestamp && kubectl get rs -n devops-assessment -o wide && kubectl rollout history deployment/appointment-slots -n devops-assessment
+Timestamp (UTC): 2026-11-27T10:04:57Z
+
+=== Step 5: failing pod application logs ===
+Exact command: kubectl logs appointment-slots-7974589dcb-b8kvd -n devops-assessment
+Timestamp (UTC): 2026-11-27T10:04:57Z
+10.244.0.1 "GET /readyz HTTP/1.1" 503 -
+10.244.0.1 "GET /healthz HTTP/1.1" 200 -
+10.244.0.1 "GET /readyz HTTP/1.1" 503 -
+10.244.0.1 "GET /readyz HTTP/1.1" 503 -
+10.244.0.1 "GET /healthz HTTP/1.1" 200 -
+10.244.0.1 "GET /readyz HTTP/1.1" 503 -
+10.244.0.1 "GET /readyz HTTP/1.1" 503 -
+10.244.0.1 "GET /healthz HTTP/1.1" 200 -
+10.244.0.1 "GET /readyz HTTP/1.1" 503 -
+10.244.0.1 "GET /readyz HTTP/1.1" 503 -
+10.244.0.1 "GET /healthz HTTP/1.1" 200 -
+10.244.0.1 "GET /readyz HTTP/1.1" 503 -
+10.244.0.1 "GET /readyz HTTP/1.1" 503 -
+10.244.0.1 "GET /healthz HTTP/1.1" 200 -
+10.244.0.1 "GET /readyz HTTP/1.1" 503 -
+10.244.0.1 "GET /readyz HTTP/1.1" 503 -
+10.244.0.1 "GET /healthz HTTP/1.1" 200 -
+10.244.0.1 "GET /readyz HTTP/1.1" 503 -
+10.244.0.1 "GET /readyz HTTP/1.1" 503 -
+10.244.0.1 "GET /healthz HTTP/1.1" 200 -
+10.244.0.1 "GET /readyz HTTP/1.1" 503 -
+10.244.0.1 "GET /readyz HTTP/1.1" 503 -
+10.244.0.1 "GET /healthz HTTP/1.1" 200 -
+10.244.0.1 "GET /readyz HTTP/1.1" 503 -
+10.244.0.1 "GET /readyz HTTP/1.1" 503 -
+10.244.0.1 "GET /healthz HTTP/1.1" 200 -
+10.244.0.1 "GET /readyz HTTP/1.1" 503 -
+apiVersion: v1
+items:
+- addressType: IPv4
+  apiVersion: discovery.k8s.io/v1
+  endpoints:
+  - addresses:
+    - 10.244.0.7
+    conditions:
+      ready: true
+      serving: true
+      terminating: false
+    nodeName: devops-assessment-control-plane
+    targetRef:
+      kind: Pod
+      name: appointment-slots-76f7d45dd7-8mm8c
+      namespace: devops-assessment
+      uid: 847a44ec-c52f-47d9-94fe-95f3978ef0a5
+  - addresses:
+    - 10.244.0.8
+    conditions:
+      ready: true
+      serving: true
+      terminating: false
+    nodeName: devops-assessment-control-plane
+    targetRef:
+      kind: Pod
+      name: appointment-slots-76f7d45dd7-gb2p8
+      namespace: devops-assessment
+      uid: cc1309c6-60bb-4ca0-b371-9985cbd4968c
+  - addresses:
+    - 10.244.0.9
+    conditions:
+      ready: false
+      serving: false
+      terminating: false
+    nodeName: devops-assessment-control-plane
+    targetRef:
+      kind: Pod
+      name: appointment-slots-7974589dcb-b8kvd
+      namespace: devops-assessment
+      uid: b0cd1134-7cfd-4afe-a276-d7be51b10516
+  kind: EndpointSlice
+  metadata:
+    annotations:
+      endpoints.kubernetes.io/last-change-trigger-time: "2026-11-27T10:03:35Z"
+    creationTimestamp: "2026-11-27T10:01:53Z"
+    generateName: appointment-slots-
+    generation: 14
+    labels:
+      endpointslice.kubernetes.io/managed-by: endpointslice-controller.k8s.io
+      kubernetes.io/service-name: appointment-slots
+    name: appointment-slots-cxplk
+    namespace: devops-assessment
+    ownerReferences:
+    - apiVersion: v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Service
+      name: appointment-slots
+      uid: b2814889-9dbc-47b4-9831-c102b929099f
+    resourceVersion: "850"
+    uid: 0c91a6ed-e4c9-4316-a76a-8cf5a50b9408
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+kind: List
+metadata:
+  resourceVersion: ""
+exit code: 0
+Name:             appointment-slots-7974589dcb-b8kvd
+Namespace:        devops-assessment
+Priority:         0
+Service Account:  default
+Node:             devops-assessment-control-plane/172.18.0.2
+Start Time:       Fri, 27 Nov 2026 10:03:21 +0000
+Labels:           app=appointment-slots
+                  pod-template-hash=7974589dcb
+Annotations:      <none>
+Status:           Running
+SeccompProfile:   RuntimeDefault
+IP:               10.244.0.9
+IPs:
+  IP:           10.244.0.9
+Controlled By:  ReplicaSet/appointment-slots-7974589dcb
+Containers:
+  appointment-slots:
+    Container ID:   containerd://2f1117af8952750ad8bc81fa51fd774553f5977697a1d0e0ef8d34ba106ed277
+    Image:          appointment-slots:v2
+    Image ID:       docker.io/library/import-2026-11-27@sha256:0e0683b8b5e7f8b0a1f71e9090bcedd7cb2648dffe0791d04af8378728a5123c
+    Port:           8080/TCP (http)
+    Host Port:      0/TCP (http)
+    State:          Running
+      Started:      Fri, 27 Nov 2026 10:03:22 +0000
+    Ready:          False
+    Restart Count:  0
+    Limits:
+      cpu:     250m
+      memory:  128Mi
+    Requests:
+      cpu:      50m
+      memory:   64Mi
+    Liveness:   http-get http://:http/healthz delay=5s timeout=1s period=10s successThreshold=1 failureThreshold=3
+    Readiness:  http-get http://:http/readyz delay=2s timeout=1s period=5s successThreshold=1 failureThreshold=2
+    Environment Variables from:
+      appointment-slots  ConfigMap  Optional: false
+    Environment:
+      FAIL_MODE:  1
+    Mounts:
+      /tmp from tmp (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-rsd8k (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Volumes:
+  tmp:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     
+    SizeLimit:  <unset>
+  kube-api-access-rsd8k:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                From               Message
+  ----     ------     ----               ----               -------
+  Normal   Scheduled  96s                default-scheduler  Successfully assigned devops-assessment/appointment-slots-7974589dcb-b8kvd to devops-assessment-control-plane
+  Normal   Pulled     95s                kubelet            spec.containers{appointment-slots}: Container image "appointment-slots:v2" already present on machine and can be accessed by the pod
+  Normal   Created    95s                kubelet            spec.containers{appointment-slots}: Container created
+  Normal   Started    95s                kubelet            spec.containers{appointment-slots}: Container started
+  Warning  Unhealthy  5s (x18 over 89s)  kubelet            spec.containers{appointment-slots}: Readiness probe failed: HTTP probe failed with statuscode: 503
+exit code: 0
+LAST SEEN   TYPE      REASON              OBJECT                                    MESSAGE
+3m4s        Normal    Scheduled           pod/appointment-slots-77dd5ffbc8-nf4kl    Successfully assigned devops-assessment/appointment-slots-77dd5ffbc8-nf4kl to devops-assessment-control-plane
+3m4s        Normal    ScalingReplicaSet   deployment/appointment-slots              Scaled up replica set appointment-slots-77dd5ffbc8 from 0 to 2
+3m4s        Normal    SuccessfulCreate    replicaset/appointment-slots-77dd5ffbc8   Created pod: appointment-slots-77dd5ffbc8-nf4kl
+3m4s        Normal    SuccessfulCreate    replicaset/appointment-slots-77dd5ffbc8   Created pod: appointment-slots-77dd5ffbc8-b64xj
+3m4s        Normal    Scheduled           pod/appointment-slots-77dd5ffbc8-b64xj    Successfully assigned devops-assessment/appointment-slots-77dd5ffbc8-b64xj to devops-assessment-control-plane
+3m3s        Normal    Pulled              pod/appointment-slots-77dd5ffbc8-b64xj    Container image "appointment-slots:v1" already present on machine and can be accessed by the pod
+3m3s        Normal    Pulled              pod/appointment-slots-77dd5ffbc8-nf4kl    Container image "appointment-slots:v1" already present on machine and can be accessed by the pod
+3m3s        Normal    Started             pod/appointment-slots-77dd5ffbc8-nf4kl    Container started
+3m3s        Normal    Created             pod/appointment-slots-77dd5ffbc8-nf4kl    Container created
+3m3s        Normal    Started             pod/appointment-slots-77dd5ffbc8-b64xj    Container started
+3m3s        Normal    Created             pod/appointment-slots-77dd5ffbc8-b64xj    Container created
+2m5s        Normal    ScalingReplicaSet   deployment/appointment-slots              Scaled up replica set appointment-slots-76f7d45dd7 from 0 to 1
+2m5s        Normal    Scheduled           pod/appointment-slots-76f7d45dd7-8mm8c    Successfully assigned devops-assessment/appointment-slots-76f7d45dd7-8mm8c to devops-assessment-control-plane
+2m5s        Normal    SuccessfulCreate    replicaset/appointment-slots-76f7d45dd7   Created pod: appointment-slots-76f7d45dd7-8mm8c
+2m4s        Normal    Started             pod/appointment-slots-76f7d45dd7-8mm8c    Container started
+2m4s        Normal    Created             pod/appointment-slots-76f7d45dd7-8mm8c    Container created
+2m4s        Normal    Pulled              pod/appointment-slots-76f7d45dd7-8mm8c    Container image "appointment-slots:v2" already present on machine and can be accessed by the pod
+118s        Normal    SuccessfulCreate    replicaset/appointment-slots-76f7d45dd7   Created pod: appointment-slots-76f7d45dd7-gb2p8
+118s        Normal    Pulled              pod/appointment-slots-76f7d45dd7-gb2p8    Container image "appointment-slots:v2" already present on machine and can be accessed by the pod
+118s        Normal    ScalingReplicaSet   deployment/appointment-slots              Scaled up replica set appointment-slots-76f7d45dd7 from 1 to 2
+118s        Normal    ScalingReplicaSet   deployment/appointment-slots              Scaled down replica set appointment-slots-77dd5ffbc8 from 2 to 1
+118s        Normal    Created             pod/appointment-slots-76f7d45dd7-gb2p8    Container created
+118s        Normal    SuccessfulDelete    replicaset/appointment-slots-77dd5ffbc8   Deleted pod: appointment-slots-77dd5ffbc8-b64xj
+118s        Normal    Scheduled           pod/appointment-slots-76f7d45dd7-gb2p8    Successfully assigned devops-assessment/appointment-slots-76f7d45dd7-gb2p8 to devops-assessment-control-plane
+118s        Normal    Killing             pod/appointment-slots-77dd5ffbc8-b64xj    Stopping container appointment-slots
+117s        Normal    Started             pod/appointment-slots-76f7d45dd7-gb2p8    Container started
+112s        Normal    SuccessfulDelete    replicaset/appointment-slots-77dd5ffbc8   Deleted pod: appointment-slots-77dd5ffbc8-nf4kl
+112s        Normal    Killing             pod/appointment-slots-77dd5ffbc8-nf4kl    Stopping container appointment-slots
+112s        Normal    ScalingReplicaSet   deployment/appointment-slots              Scaled down replica set appointment-slots-77dd5ffbc8 from 1 to 0
+96s         Normal    SuccessfulCreate    replicaset/appointment-slots-7974589dcb   Created pod: appointment-slots-7974589dcb-b8kvd
+96s         Normal    Scheduled           pod/appointment-slots-7974589dcb-b8kvd    Successfully assigned devops-assessment/appointment-slots-7974589dcb-b8kvd to devops-assessment-control-plane
+96s         Normal    ScalingReplicaSet   deployment/appointment-slots              Scaled up replica set appointment-slots-7974589dcb from 0 to 1
+95s         Normal    Pulled              pod/appointment-slots-7974589dcb-b8kvd    Container image "appointment-slots:v2" already present on machine and can be accessed by the pod
+95s         Normal    Created             pod/appointment-slots-7974589dcb-b8kvd    Container created
+95s         Normal    Started             pod/appointment-slots-7974589dcb-b8kvd    Container started
+5s          Warning   Unhealthy           pod/appointment-slots-7974589dcb-b8kvd    Readiness probe failed: HTTP probe failed with statuscode: 503
+NAME                           DESIRED   CURRENT   READY   AGE    CONTAINERS          IMAGES                 SELECTOR
+appointment-slots-76f7d45dd7   2         2         2       2m5s   appointment-slots   appointment-slots:v2   app=appointment-slots,pod-template-hash=76f7d45dd7
+appointment-slots-77dd5ffbc8   0         0         0       3m4s   appointment-slots   appointment-slots:v1   app=appointment-slots,pod-template-hash=77dd5ffbc8
+appointment-slots-7974589dcb   1         1         0       96s    appointment-slots   appointment-slots:v2   app=appointment-slots,pod-template-hash=7974589dcb
+deployment.apps/appointment-slots 
+REVISION  CHANGE-CAUSE
+1         initial release appointment-slots:v1
+2         healthy release appointment-slots:v2
+3         bad release FAIL_MODE=1
+
+exit code: 0
+
+=== Step 5: service still responds via healthy old pods ===
+Exact command: kubectl port-forward -n devops-assessment svc/appointment-slots 8080:80 >/tmp/appointment-slots-port-forward-bad.txt 2>&1 & pf=$!; sleep 3; curl -i http://127.0.0.1:8080/readyz; kill "$pf"; wait "$pf" 2>/dev/null || true
+Timestamp (UTC): 2026-11-27T10:05:11Z
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    19  100    19    0     0   1734      0 --:--:-- --:--:-- --:--:--  1900
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.12.16
+Date: Fri, 27 Nov 2026 10:05:14 GMT
+Content-Type: application/json
+Content-Length: 19
+
+{"status": "ready"}exit code: 0
+
+=== Step 5: rollback bad rollout ===
+Exact command: kubectl rollout undo deployment/appointment-slots -n devops-assessment
+Timestamp (UTC): 2026-11-27T10:05:14Z
+Warning: resource deployments/appointment-slots was previously managed with 'kubectl apply'. Rolling back will not update the kubectl.kubernetes.io/last-applied-configuration annotation, which may cause unexpected behavior on future 'kubectl apply' operations. Consider using 'kubectl apply' with your previous configuration file instead.
+deployment.apps/appointment-slots rolled back
+exit code: 0
+
+=== Step 5: recovery rollout status ===
+Exact command: kubectl rollout status deployment/appointment-slots -n devops-assessment --timeout=120s
+Timestamp (UTC): 2026-11-27T10:05:14Z
+deployment "appointment-slots" successfully rolled out
+exit code: 0
+
+=== Step 5: recovery pod readiness ===
+Exact command: kubectl get pods -n devops-assessment -o wide
+Timestamp (UTC): 2026-11-27T10:05:15Z
+NAME                                 READY   STATUS        RESTARTS   AGE     IP           NODE                              NOMINATED NODE   READINESS GATES
+appointment-slots-76f7d45dd7-8mm8c   1/1     Running       0          2m23s   10.244.0.7   devops-assessment-control-plane   <none>           <none>
+appointment-slots-76f7d45dd7-gb2p8   1/1     Running       0          2m16s   10.244.0.8   devops-assessment-control-plane   <none>           <none>
+appointment-slots-7974589dcb-b8kvd   0/1     Terminating   0          114s    10.244.0.9   devops-assessment-control-plane   <none>           <none>
+exit code: 0
+
+=== Step 5: recovery readyz endpoint ===
+Exact command: kubectl port-forward -n devops-assessment svc/appointment-slots 8080:80 >/tmp/appointment-slots-port-forward-recovery.txt 2>&1 & pf=$!; sleep 3; curl -i http://127.0.0.1:8080/readyz; kill "$pf"; wait "$pf" 2>/dev/null || true
+Timestamp (UTC): 2026-11-27T10:05:15Z
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    19  100    19    0     0   1728      0 --:--:-- --:--:-- --:--:--  1900
+HTTP/1.0 200 OK
+Server: BaseHTTP/0.6 Python/3.12.16
+Date: Fri, 27 Nov 2026 10:05:18 GMT
+Content-Type: application/json
+Content-Length: 19
+
+{"status": "ready"}exit code: 0
+
+=== Step 5: restored FAIL_MODE configuration ===
+Exact command: kubectl get deployment appointment-slots -n devops-assessment -o yaml | grep -A2 FAIL_MODE || echo "FAIL_MODE override absent from Deployment"; kubectl get configmap appointment-slots -n devops-assessment -o jsonpath="{.data.FAIL_MODE}{\"\\n\"}"; echo; grep -R -n FAIL_MODE k8s/
+Timestamp (UTC): 2026-11-27T10:05:18Z
+FAIL_MODE override absent from Deployment
+0
+
+k8s/configmap.yaml:11:  FAIL_MODE: "0"
+exit code: 0
+
+=== Step 5: final healthy deployment after recovery ===
+Exact command: kubectl get deployment appointment-slots -n devops-assessment -o wide && kubectl get pods -n devops-assessment -o custom-columns=NAME:.metadata.name,READY:.status.containerStatuses[0].ready,RESTARTS:.status.containerStatuses[0].restartCount
+Timestamp (UTC): 2026-11-27T10:05:47Z
+NAME                READY   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS          IMAGES                 SELECTOR
+appointment-slots   2/2     2            2           3m55s   appointment-slots   appointment-slots:v2   app=appointment-slots
+NAME                                 READY   RESTARTS
+appointment-slots-76f7d45dd7-8mm8c   true    0
+appointment-slots-76f7d45dd7-gb2p8   true    0
+exit code: 0
